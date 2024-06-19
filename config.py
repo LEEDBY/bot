@@ -1,8 +1,0 @@
-TOKEN = '7486681961:AAHCC08bS6g9-5GpiL7MZ0lnYFgeuGwwcRs'
-TON_API_KEY = '5276e0e17cf0e1b250842a287f97ac8eb32236cc58cbbb8ca1eb2ae0d019e4d8'
-GIVERS = [
-    {'address': 'UQC8zbNhEeh4EuRtHVL4GvGIC63RW3SNmYWz-6AtUFbXEgCH', 'secret': '78361911b1954e1641b4d4f6557bcb2811d1c338470eddfb8c44d5930b1a66b7'},
-    {'address': 'UQCtoQawV7YRQIGquWUsyehNmUST7W_5EJCuUAYNQ3ZhYiw4', 'secret': 'a0cffb149a2bae9aaa668beda63ca8957a3883ba300c13f95129833976999e86'},
-    {'address': 'UQARmnmJ_64uXYSGgyVSC-5HJNyRwKfNx5m7URR82qas294t', 'secret': '78d67d248660ed0a1e181b58cf4aeddd510e2f5151c0c1e7d6cb6369540b8fb3'},
-    {'address': 'UQC0QJpiidiQAu7cFJ8CahGt3IFxbVlSI_AcCOghXkHbS2NJ', 'secret': 'ab1ab36be6da25ea512b2ce2b59250249458805d5da0bbb87348692cf5f7f5af'},
-]
