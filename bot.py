@@ -4,6 +4,7 @@ from config import TOKEN, GIVERS
 from handlers.start_handlers import start
 from handlers.button_handlers import button
 from handlers.message_handlers import handle_message
+from handlers.profile_handlers import profile
 from services.ton_services import update_giver_balances
 import asyncio
 from telegram import BotCommand

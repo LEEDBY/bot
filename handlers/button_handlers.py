@@ -2,6 +2,7 @@ from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import CallbackContext
 from .command_handlers import start, profile, start_from_callback
 from services.ton_services import check_transaction_status, send_toncoins, generate_memo
+from handlers.profile_handlers import profile
 
 async def button(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
