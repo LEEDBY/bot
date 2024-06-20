@@ -4,12 +4,12 @@ from config import TOKEN, GIVERS
 from handlers.start_handlers import start
 from handlers.button_handlers import button
 from handlers.message_handlers import handle_message
-from handlers.profile_handlers import profile
 from services.ton_services import update_giver_balances
 import asyncio
 from telegram import BotCommand
 import nest_asyncio
 from database import create_table
+from telegram.ext import CallbackContext
 
 nest_asyncio.apply()
 
@@ -18,8 +18,11 @@ async def set_commands(app):
         BotCommand("start", "Запустить бота"),
     ])
 
-async def periodic_update(context):
-    update_giver_balances(context.application.bot_data['GIVERS'])
+async def periodic_update(context: CallbackContext):
+    try:
+        update_giver_balances(context.application.bot_data['GIVERS'])
+    except Exception as e:
+        print(f"Error during periodic update: {e}")
 
 async def run_bot():
     create_table()

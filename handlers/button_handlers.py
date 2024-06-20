@@ -1,8 +1,10 @@
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import CallbackContext
-from .command_handlers import start, profile, start_from_callback
+from .command_handlers import profile, start_from_callback
 from services.ton_services import check_transaction_status, send_toncoins, generate_memo
 from handlers.profile_handlers import profile
+from .start_handlers import start
+import asyncio
 
 async def button(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
@@ -84,6 +86,8 @@ async def button(update: Update, context: CallbackContext) -> None:
         context.user_data['awaiting_address'] = False
         context.user_data['awaiting_payment_confirmation'] = False
         await query.edit_message_text('Покупка отменена.')
+        await asyncio.sleep(1)
+        await start(update, context)
 
 async def check_payment_status(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
@@ -95,7 +99,7 @@ async def check_payment_status(update: Update, context: CallbackContext) -> None
     memo = context.user_data.get('memo')
 
     await context.bot.send_chat_action(chat_id=query.message.chat_id, action="typing")
-    await asyncio.sleep(5)  # Задержка перед повторной проверкой
+    await asyncio.sleep(10)  # Задержка перед повторной проверкой
 
     transaction = check_transaction_status(giver['address'], memo)
 

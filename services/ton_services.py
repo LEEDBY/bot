@@ -3,10 +3,20 @@ from config import TON_API_KEY
 import random
 import re
 
-def get_balance(address):
+def get_balance(address: str) -> int:
     url = f'https://toncenter.com/api/v2/getAddressBalance?address={address}&api_key={TON_API_KEY}'
     response = requests.get(url)
-    return int(response.json().get('balance', 0))
+    if response.status_code != 200:
+        print(f"Error: Received status code {response.status_code}")
+        return 0
+    
+    try:
+        response_json = response.json()
+    except requests.exceptions.JSONDecodeError:
+        print("Error: Failed to decode JSON response")
+        return 0
+    
+    return int(response_json.get('balance', 0))
 
 def send_toncoins(from_address, secret, to_address, amount, memo):
     url = 'https://toncenter.com/api/v2/sendTransaction'
