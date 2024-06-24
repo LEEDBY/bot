@@ -6,28 +6,26 @@ import time
 import aiohttp
 import config
 
-async def get_balance(address: str) -> int:
-    async with aiohttp.ClientSession() as session:
-        url = f"https://tonapi.io/v1/account/getBalance?address={address}"
-        headers = {
-            'Authorization': f'Bearer {config.TON_API_KEY}',
-        }
-        async with session.get(url, headers=headers) as response:
-            if response.status == 200:
-                data = await response.json()
-                return int(data['balance'])
-            else:
-                return 0
+BASE_URL = "https://api.ton.sh/"  # Пример API URL, измените его на реальный URL вашего API
 
-async def send_toncoins(from_address, secret, to_address, amount, memo):
-    url = 'https://toncenter.com/api/v2/sendTransaction'
+async def get_balance(address):
+    url = BASE_URL + "getJettonBalance"
+    params = {
+        "address": address,
+        "jetton": "EQBUSxaas0QkBQcAjaLPYoWPNrWMD7tUGNbrdNJQ60YE8Khn"
+    }
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, params=params) as response:
+            result = await response.json()
+            return result.get('balance', 0)
+
+async def send_xgr(from_address, to_address, amount):
+    url = BASE_URL + "sendJetton"
     data = {
-        'from': from_address,
-        'to': to_address,
-        'value': amount,
-        'api_key': TON_API_KEY,
-        'secret': secret,
-        'comment': memo
+        "from": from_address,
+        "to": to_address,
+        "amount": amount,
+        "jetton": "EQBUSxaas0QkBQcAjaLPYoWPNrWMD7tUGNbrdNJQ60YE8Khn"
     }
     async with aiohttp.ClientSession() as session:
         async with session.post(url, json=data) as response:

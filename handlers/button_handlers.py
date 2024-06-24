@@ -1,7 +1,7 @@
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import CallbackContext
 from .command_handlers import profile, start
-from services.ton_services import check_transaction_status, send_toncoins, generate_memo
+from services.ton_services import check_transaction_status, send_xgr, generate_memo
 from handlers.profile_handlers import profile
 from .start_handlers import start_from_callback
 import asyncio
@@ -15,6 +15,7 @@ async def button(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     lang_code = context.user_data.get('language', 'en')
     await query.answer()
+
     if query.data == 'buy':
         await update_giver_balances(config.GIVERS)
         balances = [giver['balance'] for giver in config.GIVERS]
@@ -24,10 +25,13 @@ async def button(update: Update, context: CallbackContext) -> None:
         reply_markup = InlineKeyboardMarkup(keyboard)
         context.user_data['previous_state'] = 'main_menu'
         await query.edit_message_text(text=LANGUAGES[lang_code]['choose_giver'] + balance_info, reply_markup=reply_markup)
+
     elif query.data == 'choose_language':
         await choose_language(update, context)
+
     elif query.data.startswith('set_lang_'):
         await set_language(update, context)
+
     elif query.data == 'balance':
         await update_giver_balances(config.GIVERS)
         balances = [giver['balance'] for giver in config.GIVERS]
@@ -36,6 +40,7 @@ async def button(update: Update, context: CallbackContext) -> None:
         reply_markup = InlineKeyboardMarkup(keyboard)
         context.user_data['previous_state'] = 'main_menu'
         await query.edit_message_text(text=LANGUAGES[lang_code]['balance_info'].format(balance_info=balance_info), reply_markup=reply_markup)
+
     elif query.data.startswith('buy_giver_'):
         giver_index = int(query.data.split('_')[-1])
         context.user_data['selected_giver'] = giver_index
@@ -47,8 +52,10 @@ async def button(update: Update, context: CallbackContext) -> None:
             text=LANGUAGES[lang_code]['enter_address'].format(giver_index=giver_index+1),
             reply_markup=reply_markup
         )
+
     elif query.data == 'back_to_main':
         await start(update, context)
+
     elif query.data == 'back_to_buy':
         await update_giver_balances(config.GIVERS)
         balances = [giver['balance'] for giver in config.GIVERS]
@@ -60,9 +67,11 @@ async def button(update: Update, context: CallbackContext) -> None:
         reply_markup = InlineKeyboardMarkup(keyboard)
         context.user_data['previous_state'] = 'main_menu'
         await query.edit_message_text(text=LANGUAGES[lang_code]['choose_giver'] + '\n' + balance_info, reply_markup=reply_markup)
+
     elif query.data == 'profile':
         await profile(update, context)
         context.user_data['previous_state'] = 'main_menu'
+
     elif query.data == 'confirm_purchase':
         user_address = context.user_data.get('user_address', None)
         token_amount = context.user_data.get('token_amount', None)
@@ -81,27 +90,32 @@ async def button(update: Update, context: CallbackContext) -> None:
             await query.edit_message_text(text=payment_info, reply_markup=confirm_reply_markup)
         else:
             await query.edit_message_text(LANGUAGES[lang_code]['error_occurred'])
+
     elif query.data == 'confirm_payment':
         giver_index = context.user_data.get('selected_giver', None)
         user_id = query.from_user.id
         memo = context.user_data.get('memo', None)
+        user_address = context.user_data.get('user_address', None)
+        token_amount = context.user_data.get('token_amount', None)
         giver = config.GIVERS[giver_index]
         if giver_index is not None and user_id and memo:
             status = await check_transaction_status(giver['address'], memo)
             if status:
+                await send_xgr(giver['address'], user_address, token_amount)
                 await query.edit_message_text(LANGUAGES[lang_code]['payment_successful'])
-                await start(query.message, context)
+                await start_from_callback(update.callback_query, context)
             else:
                 await query.edit_message_text(LANGUAGES[lang_code]['payment_failed'])
-                await start(query.message, context)
+                await start_from_callback(update.callback_query, context)
         else:
             await query.edit_message_text(LANGUAGES[lang_code]['error_occurred'])
+
     elif query.data == 'cancel_purchase':
         context.user_data['awaiting_amount'] = False
         context.user_data['awaiting_address'] = False
         context.user_data['awaiting_payment_confirmation'] = False
-        await query.edit_message_text(LANGUAGES[lang_code]['purchase_cancel'])
-        await start(query.message, context)
+        await query.edit_message_text(LANGUAGES[lang_code]['cancel_purchase'])
+        await start_from_callback(update.callback_query, context)
 
 async def check_payment_status(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
