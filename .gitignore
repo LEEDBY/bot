@@ -1,1 +1,8 @@
 config.py
+.gitignore
+users.db
+test_import.py
+sqlite3.exe
+.git
+__pycache__/
+TonTools/

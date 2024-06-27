@@ -4,7 +4,7 @@ from config import TOKEN, GIVERS
 from handlers.command_handlers import start
 from handlers.button_handlers import button
 from handlers.message_handlers import handle_message
-from services.ton_services import update_giver_balances
+from services.ton_services import update_giver_balances, update_all_giver_balances, periodic_update_balances
 import asyncio
 from telegram import BotCommand
 import nest_asyncio
@@ -29,12 +29,14 @@ async def run_bot():
     create_table()
 
     app = Application.builder().token(config.TOKEN).build()
+    asyncio.create_task(periodic_update_balances())
 
     # Инициализируем данные о гиверах в bot_data
+    await update_all_giver_balances()
     app.bot_data['GIVERS'] = config.GIVERS
 
     # Инициализируем баланс гиверов
-    await update_giver_balances(app.bot_data['GIVERS'])
+    await update_giver_balances(app.bot_data['GIVERS'], 'new_address')  # Добавлен аргумент address_key
     app.bot_data['GIVERS'] = GIVERS
 
     job_queue = app.job_queue

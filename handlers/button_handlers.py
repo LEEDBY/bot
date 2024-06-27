@@ -9,7 +9,7 @@ from handlers.language_handlers import choose_language
 from handlers.languages import LANGUAGES
 from handlers.language_handlers import set_language
 import config
-from services.ton_services import get_balance, update_giver_balances
+from services.ton_services import update_giver_balances
 
 async def button(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
@@ -17,7 +17,7 @@ async def button(update: Update, context: CallbackContext) -> None:
     await query.answer()
 
     if query.data == 'buy':
-        await update_giver_balances(config.GIVERS)
+        await update_giver_balances(config.GIVERS, 'new_address')
         balances = [giver['balance'] for giver in config.GIVERS]
         balance_info = '\n'.join([LANGUAGES[lang_code]['giver_balance'].format(i=i+1, balance=balance, total=giver['initial_balance']) for i, (balance, giver) in enumerate(zip(balances, config.GIVERS))])
         keyboard = [[InlineKeyboardButton(f"Giver {i+1}", callback_data=f'buy_giver_{i}') for i in range(len(config.GIVERS))]]
@@ -33,7 +33,7 @@ async def button(update: Update, context: CallbackContext) -> None:
         await set_language(update, context)
 
     elif query.data == 'balance':
-        await update_giver_balances(config.GIVERS)
+        await update_giver_balances(config.GIVERS, 'new_address')
         balances = [giver['balance'] for giver in config.GIVERS]
         balance_info = '\n'.join([LANGUAGES[lang_code]['giver_balance'].format(i=i+1, balance=balance, total=giver['initial_balance']) for i, (balance, giver) in enumerate(zip(balances, config.GIVERS))])
         keyboard = [[InlineKeyboardButton(LANGUAGES[lang_code]['back'], callback_data='back_to_main')]]
@@ -57,7 +57,7 @@ async def button(update: Update, context: CallbackContext) -> None:
         await start(update, context)
 
     elif query.data == 'back_to_buy':
-        await update_giver_balances(config.GIVERS)
+        await update_giver_balances(config.GIVERS, 'new_address')
         balances = [giver['balance'] for giver in config.GIVERS]
         balance_info = '\n'.join(
             [LANGUAGES[lang_code]['giver_balance'].format(i=i+1, balance=balance, total=giver['initial_balance']) for i, (balance, giver) in enumerate(zip(balances, config.GIVERS))]
